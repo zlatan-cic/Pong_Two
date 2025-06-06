@@ -116,4 +116,5 @@ void Bat::update(sf::Time dt) {
 	}
 
 	m_Shape.setPosition(m_Position);
+	// test for git
 }
