@@ -1,4 +1,5 @@
 #include "Bat.h"
+#include "Ball.h"
 #include <sstream>
 #include <cstdlib>
 #include <SFML/Graphics.hpp>
@@ -17,8 +18,13 @@ int main()
     int score = 0;
     int lives = 3;
 
+    bool hasScored = false;
+
     // Create a bat at the bottom center of the screne
     Bat bat(1920 / 2, 1080 - 20);
+
+    // Create a ball
+    Ball ball(1920 / 2, 0);
 
     // Crerate text object called HUD
     sf::Text hud;
@@ -131,15 +137,62 @@ int main()
         // Update the delta time
         Time dt = clock.restart();
         bat.update(dt);
+        ball.update(dt);
 
         // Update the HUD text
         std::stringstream ss;
         ss << "Score: " << score << " Lives: " << lives;
         hud.setString(ss.str());
 
+        if (ball.getPosition().top > window.getSize().y)
+        {
+            // reverse ball direction
+            ball.reboundBottom();
+            // remove life
+            lives--;
+            // check for zero lifes
+            if (lives < 1)
+            {
+                // reset the score
+                score = 0;
+                // reset the lives
+                lives = 3;
+            }
+        }
+
+        if (ball.getPosition().top < 0)
+        {
+            if (!hasScored) {
+                ball.reboundBatOrTop();
+                score++;
+                hasScored = true;
+            }
+        }
+
+        if (ball.getPosition().left < 0 || ball.getPosition().left + ball.getPosition().width > window.getSize().x)
+        {
+            ball.reboundSides();
+        }
+
+        if (ball.getPosition().intersects(bat.getPosition()))
+        {
+            ball.reboundBatOrTop();
+            hasScored = false;
+        }
+        else if (ball.getPosition().top < 0)
+        {
+            if (!hasScored)
+            {
+                ball.reboundBatOrTop();
+                score++;
+                hasScored = true;
+            }
+        }
+
         window.clear();
         window.draw(hud);
         window.draw(bat.getShape());
+        window.draw(ball.getShape());
         window.display();
     }
 };
