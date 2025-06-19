@@ -1,4 +1,4 @@
-#include "Bat.h"
+﻿#include "Bat.h"
 #include "Ball.h"
 #include <sstream>
 #include <cstdlib>
@@ -18,10 +18,20 @@ int main()
     int score = 0;
     int lives = 3;
 
+    int score_2 = 0;
+    int lives_2 = 3;
+
+    // Ovo brat CHATgpt pomogo
+    sf::Clock scoreCooldown;
+    //
+
     bool hasScored = false;
 
     // Create a bat at the bottom center of the screne
     Bat bat(1920 / 2, 1080 - 20);
+    Bat bat2(1920 / 2, 20);
+
+    bat2.getShape().setFillColor(Color::Green);
 
     // Create a ball
     Ball ball(1920 / 2, 0);
@@ -29,17 +39,28 @@ int main()
     // Crerate text object called HUD
     sf::Text hud;
     sf::Font font;
+    sf::Text hudP2;//
+
     font.loadFromFile("fonts/Gameplay.ttf");
 
     // Set font style to our game
     hud.setFont(font);
+    hudP2.setFont(font);//
 
     // Make it nice and big
-    hud.setCharacterSize(50);
+    hud.setCharacterSize(30);
+    hudP2.setCharacterSize(30); //
 
     // Create a color
     hud.setFillColor(sf::Color::White);
+    hudP2.setFillColor(sf::Color::Green); //
+    
     hud.setPosition(20, 20);
+    hudP2.setPosition(
+        static_cast<float>(window.getSize().x) - hudP2.getLocalBounds().width - 20.0f,
+        20.0f
+    );
+
 
     // Here is our clock for timing everything
     sf::Clock clock;
@@ -95,6 +116,42 @@ int main()
         {
             bat.stopDown();
         }
+        // player 2
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
+            bat2.moveLeft();
+        }
+        else
+        {
+            bat2.stopLeft();
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        {
+            bat2.moveRight();
+        }
+        else
+        {
+            bat2.stopRight();
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        {
+            bat2.moveUp();
+        }
+        else
+        {
+            bat2.stopUp();
+        }
+
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
+            bat2.moveDown();
+        }
+        else
+        {
+            bat2.stopDown();
+        }
 
         // Checing the bat is hiting sides left or righr
         if (bat.getPosition().left < 0 && bat.isMovingLeft())
@@ -137,61 +194,87 @@ int main()
         // Update the delta time
         Time dt = clock.restart();
         bat.update(dt);
+        bat2.update(dt);
         ball.update(dt);
 
-        // Update the HUD text
-        std::stringstream ss;
-        ss << "Score: " << score << " Lives: " << lives;
+        // HUD Update
+        std::stringstream ss, ssP2;
+        ss << "Player_1 " << "Score: " << score << " Lives: " << lives;
+        ssP2 << "Player_2 " << "Score: " << score_2 << " Lives: " << lives_2;
         hud.setString(ss.str());
+        hudP2.setString(ssP2.str());
+        hudP2.setOrigin(hudP2.getLocalBounds().width, 0);
+        hudP2.setPosition(window.getSize().x - 20, 20);
 
-        if (ball.getPosition().top > window.getSize().y)
+        // Gornji udarac (Player 1 poen)
+        if (ball.getPosition().top + ball.getPosition().height > window.getSize().y)
         {
-            // reverse ball direction
-            ball.reboundBottom();
-            // remove life
-            lives--;
-            // check for zero lifes
-            if (lives < 1)
+            if (!hasScored)
             {
-                // reset the score
-                score = 0;
-                // reset the lives
-                lives = 3;
+                score_2++;
+                lives--;
+                hasScored = true;
+                scoreCooldown.restart();
+                ball.reset(1920 / 2, 1080 / 2, 0.7f, -0.7f); // ide ka Player 1 opet
+
+                if (lives < 1)
+                {
+                    lives = 3;
+                    score = 0;
+                }
             }
         }
 
+        // Gornji udarac (Player 2 propustio — Player 1 dobija poen)
         if (ball.getPosition().top < 0)
         {
-            if (!hasScored) {
-                ball.reboundBatOrTop();
+            if (!hasScored)
+            {
                 score++;
+                lives_2--;
                 hasScored = true;
+                scoreCooldown.restart();
+                ball.reset(1920 / 2, 1080 / 2, 0.7f, 0.7f); // ide ka Player 2 opet
+
+                if (lives_2 < 1)
+                {
+                    lives_2 = 3;
+                    score_2 = 0;
+                }
             }
         }
 
+        // Resetuj hasScored nakon 1 sekunde
+        if (hasScored && scoreCooldown.getElapsedTime().asSeconds() > 1.0f)
+        {
+            hasScored = false;
+        }
+
+        // Side rebound
         if (ball.getPosition().left < 0 || ball.getPosition().left + ball.getPosition().width > window.getSize().x)
         {
             ball.reboundSides();
         }
 
+        // Paddle hit
         if (ball.getPosition().intersects(bat.getPosition()))
+        {
+            ball.reboundBatOrTop();
+            hasScored = false; // može da se udari opet bez greške
+        }
+
+        if (ball.getPosition().intersects(bat2.getPosition()))
         {
             ball.reboundBatOrTop();
             hasScored = false;
         }
-        else if (ball.getPosition().top < 0)
-        {
-            if (!hasScored)
-            {
-                ball.reboundBatOrTop();
-                score++;
-                hasScored = true;
-            }
-        }
 
+        // Render
         window.clear();
         window.draw(hud);
+        window.draw(hudP2);
         window.draw(bat.getShape());
+        window.draw(bat2.getShape());
         window.draw(ball.getShape());
         window.display();
     }

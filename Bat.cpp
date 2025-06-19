@@ -29,7 +29,7 @@ sf::FloatRect Bat::getPosition()
 
 // Vraća pravougaoni oblik bata (m_Shape), koji se koristi za crtanje na ekranu.
 // Ova funkcija omogućava glavnoj petlji igre da nacrta bata pomoću window.draw().
-sf::RectangleShape Bat::getShape()
+sf::RectangleShape& Bat::getShape()
 {
 	return m_Shape;
 }

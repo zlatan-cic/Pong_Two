@@ -13,7 +13,7 @@ private:
 	RectangleShape m_Shape;
 
 	// Brzina kretanja lopte (piksela po sekundi)
-	float m_Speed = 1000.0f;
+	float m_Speed = 500.0f;
 
 	// Pravac kretanja lopte po X osi (horizontalno)
 	float m_DirectionX = .2f;
@@ -45,4 +45,6 @@ public:
 
 	// Ažurira poziciju lopte u svakom frame-u (na osnovu pravca i brzine)
 	void update(Time dt);
+
+	void reset(float startX, float startY, float dirX, float dirY);
 };

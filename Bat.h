@@ -37,7 +37,7 @@ public:
 
 	// Vraća pravougaoni oblik bata (m_Shape) koji se koristi za crtanje.
 	// Ova metoda omogućava da se bat nacrta u glavnom prozoru (window).
-	sf::RectangleShape getShape();
+	sf::RectangleShape& getShape();
 
 	void moveLeft();
 	void moveRight();

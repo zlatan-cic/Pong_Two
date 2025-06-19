@@ -53,3 +53,14 @@ void Ball::update(Time dt)
 	// Pomeraj lopticu
 	m_Shape.setPosition(m_Position);
 }
+void Ball::reset(float startX, float startY, float dirX, float dirY)
+{
+	m_Position.x = startX;
+	m_Position.y = startY;
+	m_Shape.setPosition(m_Position);
+
+	m_DirectionX = dirX;
+	m_DirectionY = dirY;
+}
+
+
